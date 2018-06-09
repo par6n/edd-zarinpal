@@ -13,10 +13,12 @@
  * @param 				array $currencies Currencies list
  * @return 				array
  */
+if ( ! function_exists('irg_add_toman_currency')):
 function irg_add_tomain_currency( $currencies ) {
 	$currencies['IRT'] = 'تومان';
 	return $currencies;
 }
+endif;
 add_filter( 'edd_currencies', 'irg_add_tomain_currency' );
 
 /**
