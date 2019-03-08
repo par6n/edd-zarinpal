@@ -91,7 +91,7 @@ class EDD_ZarinPal_Gateway {
 				$redirect = 'https://www.zarinpal.com/pg/StartPay/%s';
 
 			$merchant = ( isset( $edd_options[ $this->keyname . '_merchant' ] ) ? $edd_options[ $this->keyname . '_merchant' ] : '' );
-			$desc = 'پرداخت شماره #' . $payment;
+			$desc = 'پرداخت شماره #' . $payment.' | '.$purchase_data['user_info']['first_name'].' '.$purchase_data['user_info']['last_name'];
 			$callback = add_query_arg( 'verify_' . $this->keyname, '1', get_permalink( $edd_options['success_page'] ) );
 
 			$amount = intval( $purchase_data['price'] ) / 10;
@@ -102,6 +102,7 @@ class EDD_ZarinPal_Gateway {
 				'MerchantID' 			=>	$merchant,
 				'Amount' 				=>	$amount,
 				'Description' 			=>	$desc,
+				'Email' 			=>	$purchase_data['user_info']['email'],
 				'CallbackURL' 			=>	$callback
 			) );
 
