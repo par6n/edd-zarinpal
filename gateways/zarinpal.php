@@ -320,25 +320,66 @@ class EDD_ZarinPal_Gateway {
 	 * @param 			int $error_id
 	 * @return 			string
 	 */
+
 	public function error_reason( $error_id ) {
 		$message = 'خطای ناشناخته';
-
-		switch( $error_id ) {
+		
+		switch ( $error_id ) {
 			case '-1':
-				$message = 'اطلاعات ارسال‌شده ناقص است.';
+				$message =  "اطلاعات ارسال شده ناقص است";
 				break;
 			case '-2':
-				$message = 'IP یا کد پذیرنده صحیح نیست.';
+				$message =  "IP -2و يا مرچنت كد پذيرنده صحيح نيست.";
 				break;
 			case '-3':
-				$message = 'رقم پرداخت بالای 100 تومان باید باشد.';
+				$message =  "با توجه به محدوديت هاي شاپرك امكان پرداخت با رقم درخواست شده ميسر نمي باشد";
 				break;
 			case '-4':
-				$message = 'پذیرنده معتبر نیست.';
+				$message =  "سطح تاييد پذيرنده پايين تر از سطح نقره اي است.";
 				break;
+			case '-11':
+				$message =  "درخواست مورد نظر يافت نشد.";
+				break;
+			case '-12':
+				$message =  "امكان ويرايش درخواست ميسر نمي باشد";
+				break;
+			case '-21':
+				$message =  "هيچ نوع عمليات مالي براي اين تراكنش يافت نشد.";
+				break;
+			case '-22':
+				$message =  "هيچ نوع عمليات مالي براي اين تراكنش يافت نشد.";
+				break;
+			case '-33':
+				$message =  "رقم تراكنش با رقم پرداخت شده مطابقت ندارد.";
+				break;
+			case '-34':
+				$message =  "سقف تقسيم تراكنش از لحاظ تعداد يا رقم عبور نموده است";
+				break;
+			case '-40':
+				$message =  "اجازه دسترسي به متد مربوطه وجود ندارد.";
+				break;
+			case '-41':
+				$message =  "اطلاعات ارسال شده مربوط به  AdditionalDataغيرمعتبر ميباشد.";
+				break;
+			case '-42':
+				$message =  "مدت زمان معتبر طول عمر شناسه پرداخت بايد بين  30دقيه تا  45روز مي باشد.";
+				break;
+			case '-54':
+				$message =  "درخواست مورد نظر آرشيو شده است.";
+				break;
+			case '100':
+				$message =  "عمليات با موفقيت انجام گرديده است";
+				break;
+			case '101':
+				$message =  "عمليات پرداخت موفق بوده و قبلا  PaymentVerificationتراكنش انجام شده است.";
+			break;
+			case '102':
+				$message =  "تراکنش توسط کاربر لغو شد.";
+			break;
 		}
-
+		
 		return $message;
+		
 	}
 }
 
