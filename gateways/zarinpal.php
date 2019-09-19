@@ -2,7 +2,7 @@
 /**
  * ZarinPal Gateway for Easy Digital Downloads
  *
- * @author 				Ehsaan (iehsan.ir@gmail.com)
+ * @author 				ehsaan <ehsaan@riseup.net>
  * @package 			EZP
  * @subpackage 			Gateways
  */
@@ -73,7 +73,7 @@ class EDD_ZarinPal_Gateway {
 
 	/**
 	 * Process the payment
-	 * 
+	 *
 	 * @param 				array $purchase_data
 	 * @return 				void
 	 */
@@ -85,10 +85,8 @@ class EDD_ZarinPal_Gateway {
 		if ( $payment ) {
 
 			$zaringate = ( isset( $edd_options[ $this->keyname . '_zaringate' ] ) ? $edd_options[ $this->keyname . '_zaringate' ] : false );
-			if ( $zaringate )
-				$redirect = 'https://www.zarinpal.com/pg/StartPay/%s/ZarinGate';
-			else
-				$redirect = 'https://www.zarinpal.com/pg/StartPay/%s';
+
+			$redirect = $zaringate ? 'https://www.zarinpal.com/pg/StartPay/%s/ZarinGate' : 'https://www.zarinpal.com/pg/StartPay/%s';
 
 			$merchant = ( isset( $edd_options[ $this->keyname . '_merchant' ] ) ? $edd_options[ $this->keyname . '_merchant' ] : '' );
 			$desc = 'پرداخت شماره #' . $payment.' | '.$purchase_data['user_info']['first_name'].' '.$purchase_data['user_info']['last_name'];
@@ -102,7 +100,7 @@ class EDD_ZarinPal_Gateway {
 				'MerchantID' 			=>	$merchant,
 				'Amount' 				=>	$amount,
 				'Description' 			=>	$desc,
-				'Email' 			=>	$purchase_data['user_info']['email'],
+				'Email' 				=>	$purchase_data['user_info']['email'],
 				'CallbackURL' 			=>	$callback
 			) );
 
@@ -112,7 +110,7 @@ class EDD_ZarinPal_Gateway {
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
 			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 			curl_setopt( $ch, CURLOPT_HTTPHEADER, [ 'Content-Type: application/json', 'Content-Length: ' . strlen( $data ) ] );
-			
+
 			$result = curl_exec( $ch );
 			$err = curl_error( $ch );
 			if ( $err ) {
@@ -133,7 +131,7 @@ class EDD_ZarinPal_Gateway {
 
 				wp_redirect( sprintf( $redirect, $result['Authority'] ) );
 			} else {
-				edd_insert_payment_note( $payment, 'کدخطا: ' . $result['Status'] );
+				edd_insert_payment_note( $payment, 'کد خطا: ' . $result['Status'] );
 				edd_insert_payment_note( $payment, 'علت خطا: ' . $this->error_reason( $result['Status'] ) );
 				edd_update_payment_status( $payment, 'failed' );
 
@@ -155,17 +153,24 @@ class EDD_ZarinPal_Gateway {
 
 		if ( isset( $_GET['Authority'] ) ) {
 			$authority = sanitize_text_field( $_GET['Authority'] );
+
 			@ session_start();
 			$payment = edd_get_payment( $_SESSION['zp_payment'] );
 			unset( $_SESSION['zp_payment'] );
+
 			if ( ! $payment ) {
 				wp_die( 'رکورد پرداخت موردنظر وجود ندارد!' );
 			}
-			if ( $payment->status == 'complete' ) return false;
+
+			if ( $payment->status == 'complete' ) {
+				return false;
+			}
 
 			$amount = intval( edd_get_payment_amount( $payment->ID ) ) / 10;
-			if ( edd_get_currency() == 'IRT' )
-				$amount = $amount * 10; // Return back to original one.
+
+			if ( 'IRT' === edd_get_currency() ) {
+				$amount = $amount * 10;
+			}
 
 			$merchant = ( isset( $edd_options[ $this->keyname . '_merchant' ] ) ? $edd_options[ $this->keyname . '_merchant' ] : '' );
 
@@ -181,17 +186,18 @@ class EDD_ZarinPal_Gateway {
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
 			curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 			curl_setopt( $ch, CURLOPT_HTTPHEADER, [ 'Content-Type: application/json', 'Content-Length: ' . strlen( $data ) ] );
-			
+
 			$result = curl_exec( $ch );
 			curl_close( $ch );
 			$result = json_decode( $result, true );
 
 			edd_empty_cart();
 
-			if ( version_compare( EDD_VERSION, '2.1', '>=' ) )
+			if ( version_compare( EDD_VERSION, '2.1', '>=' ) ) {
 				edd_set_payment_transaction_id( $payment->ID, $authority );
+			}
 
-			if ( $result['Status'] == 100 ) {
+			if ( 100 == $result['Status'] ) {
 				edd_insert_payment_note( $payment->ID, 'شماره تراکنش بانکی: ' . $result['RefID'] );
 				edd_update_payment_meta( $payment->ID, 'zarinpal_refid', $result['RefID'] );
 				edd_update_payment_status( $payment->ID, 'publish' );
@@ -199,6 +205,8 @@ class EDD_ZarinPal_Gateway {
 			} else {
 				edd_update_payment_status( $payment->ID, 'failed' );
 				wp_redirect( get_permalink( $edd_options['failure_page'] ) );
+
+				exit;
 			}
 		}
 	}
@@ -212,7 +220,7 @@ class EDD_ZarinPal_Gateway {
 	public function receipt( $payment ) {
 		$refid = edd_get_payment_meta( $payment->ID, 'zarinpal_refid' );
 		if ( $refid ) {
-			echo '<tr class="zarinpal-ref-id-row ezp-field ehsaan-me"><td><strong>شماره تراکنش بانکی:</strong></td><td>' . $refid . '</td></tr>';
+			echo '<tr class="zarinpal-ref-id-row ezp-field ehsaan-dev"><td><strong>شماره تراکنش بانکی:</strong></td><td>' . $refid . '</td></tr>';
 		}
 	}
 
@@ -227,7 +235,7 @@ class EDD_ZarinPal_Gateway {
 			$this->keyname . '_header' 		=>	array(
 				'id' 			=>	$this->keyname . '_header',
 				'type' 			=>	'header',
-				'name' 			=>	'<strong>درگاه زرین‌پال</strong> توسط <a href="http://ehsaan.me">Ehsaan</a>'
+				'name' 			=>	'<strong>درگاه زرین‌پال</strong> توسط <a href="https://ehsaan.dev" target="_blank">ehsaan</a>'
 			),
 			$this->keyname . '_merchant' 		=>	array(
 				'id' 			=>	$this->keyname . '_merchant',
@@ -285,9 +293,9 @@ class EDD_ZarinPal_Gateway {
 	private function insert_payment( $purchase_data ) {
 		global $edd_options;
 
-		$payment_data = array( 
-			'price' => $purchase_data['price'], 
-			'date' => $purchase_data['date'], 
+		$payment_data = array(
+			'price' => $purchase_data['price'],
+			'date' => $purchase_data['date'],
 			'user_email' => $purchase_data['user_email'],
 			'purchase_key' => $purchase_data['purchase_key'],
 			'currency' => $edd_options['currency'],
@@ -323,63 +331,63 @@ class EDD_ZarinPal_Gateway {
 
 	public function error_reason( $error_id ) {
 		$message = 'خطای ناشناخته';
-		
+
 		switch ( $error_id ) {
 			case '-1':
-				$message =  "اطلاعات ارسال شده ناقص است";
+				$message = 'اطلاعات ارسال شده ناقص است';
 				break;
 			case '-2':
-				$message =  "IP -2و يا مرچنت كد پذيرنده صحيح نيست.";
+				$message = 'IP -2و يا مرچنت كد پذيرنده صحيح نيست.';
 				break;
 			case '-3':
-				$message =  "با توجه به محدوديت هاي شاپرك امكان پرداخت با رقم درخواست شده ميسر نمي باشد";
+				$message = 'با توجه به محدوديت هاي شاپرك امكان پرداخت با رقم درخواست شده ميسر نمي باشد';
 				break;
 			case '-4':
-				$message =  "سطح تاييد پذيرنده پايين تر از سطح نقره اي است.";
+				$message = 'سطح تاييد پذيرنده پايين تر از سطح نقره اي است.';
 				break;
 			case '-11':
-				$message =  "درخواست مورد نظر يافت نشد.";
+				$message = 'درخواست مورد نظر يافت نشد.';
 				break;
 			case '-12':
-				$message =  "امكان ويرايش درخواست ميسر نمي باشد";
+				$message = 'امكان ويرايش درخواست ميسر نمي باشد';
 				break;
 			case '-21':
-				$message =  "هيچ نوع عمليات مالي براي اين تراكنش يافت نشد.";
+				$message = 'هيچ نوع عمليات مالي براي اين تراكنش يافت نشد.';
 				break;
 			case '-22':
-				$message =  "هيچ نوع عمليات مالي براي اين تراكنش يافت نشد.";
+				$message = 'هيچ نوع عمليات مالي براي اين تراكنش يافت نشد.';
 				break;
 			case '-33':
-				$message =  "رقم تراكنش با رقم پرداخت شده مطابقت ندارد.";
+				$message = 'رقم تراكنش با رقم پرداخت شده مطابقت ندارد.';
 				break;
 			case '-34':
-				$message =  "سقف تقسيم تراكنش از لحاظ تعداد يا رقم عبور نموده است";
+				$message = 'سقف تقسيم تراكنش از لحاظ تعداد يا رقم عبور نموده است';
 				break;
 			case '-40':
-				$message =  "اجازه دسترسي به متد مربوطه وجود ندارد.";
+				$message = 'اجازه دسترسي به متد مربوطه وجود ندارد.';
 				break;
 			case '-41':
-				$message =  "اطلاعات ارسال شده مربوط به  AdditionalDataغيرمعتبر ميباشد.";
+				$message = 'اطلاعات ارسال شده مربوط به  AdditionalDataغيرمعتبر ميباشد.';
 				break;
 			case '-42':
-				$message =  "مدت زمان معتبر طول عمر شناسه پرداخت بايد بين  30دقيه تا  45روز مي باشد.";
+				$message = 'مدت زمان معتبر طول عمر شناسه پرداخت بايد بين  30دقيه تا  45روز مي باشد.';
 				break;
 			case '-54':
-				$message =  "درخواست مورد نظر آرشيو شده است.";
+				$message = 'درخواست مورد نظر آرشيو شده است.';
 				break;
 			case '100':
-				$message =  "عمليات با موفقيت انجام گرديده است";
+				$message = 'عمليات با موفقيت انجام گرديده است';
 				break;
 			case '101':
-				$message =  "عمليات پرداخت موفق بوده و قبلا  PaymentVerificationتراكنش انجام شده است.";
+				$message = 'عمليات پرداخت موفق بوده و قبلا  PaymentVerificationتراكنش انجام شده است.';
 			break;
 			case '102':
-				$message =  "تراکنش توسط کاربر لغو شد.";
+				$message = 'تراکنش توسط کاربر لغو شد.';
 			break;
 		}
-		
+
 		return $message;
-		
+
 	}
 }
 

@@ -1,2 +1,5 @@
+### Version 2.1:
+- Fix a bug in returning from the gateway.
+
 ### Version 2.0:
 - Initial release in GitLab.

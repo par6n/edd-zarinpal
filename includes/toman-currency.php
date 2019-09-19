@@ -2,7 +2,7 @@
 /**
  * Add Toman currency to Easy Digital Downloads
  *
- * @author 				Ehsaan
+ * @author 				ehsaan <ehsaan@riseup.net>
  * @package 			EZP
  * @subpackage 			Toman
  */
@@ -25,11 +25,11 @@ add_filter( 'edd_currencies', 'irg_add_tomain_currency' );
  * Format decimals
  */
 add_filter( 'edd_sanitize_amount_decimals', function( $decimals ) {
-	
+
 	$currency = function_exists('edd_get_currency') ? edd_get_currency() : '';
-	
+
 	global $edd_options;
-	
+
 	if ( $edd_options['currency'] == 'IRT' || $currency == 'IRT' || $edd_options['currency'] == 'RIAL' || $currency == 'RIAL' ) {
 		return $decimals = 0;
 	}
@@ -38,15 +38,15 @@ add_filter( 'edd_sanitize_amount_decimals', function( $decimals ) {
 } );
 
 add_filter( 'edd_format_amount_decimals', function( $decimals ) {
-	
+
 	$currency = function_exists('edd_get_currency') ? edd_get_currency() : '';
-	
+
 	global $edd_options;
-	
+
 	if ( $edd_options['currency'] == 'IRT' || $currency == 'IRT' || $edd_options['currency'] == 'RIAL' || $currency == 'RIAL' ) {
 		return $decimals = 0;
 	}
-	
+
 	return $decimals;
 } );
 
